@@ -1,9 +1,11 @@
 package project;
 
+import project.db.AuthenticationFilter;
 import project.exceptions.ConstraintViolationExceptionMapper;
-import project.services.AutorResources;
+import project.services.AutorResource;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
+import project.services.HelloResource;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -20,7 +22,8 @@ public class RestConfig extends Application {
         return new HashSet<Class<?>>(
                 Arrays.asList(
                         ConstraintViolationExceptionMapper.class,
-                        AutorResources.class
+                        AutorResource.class,
+                        AuthenticationFilter.class
                 ));
     }
 }

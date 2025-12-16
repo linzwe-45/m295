@@ -1,5 +1,6 @@
 package project.autor;
 
+import jakarta.validation.constraints.Past;
 import project.buch.Buch;
 
 import java.math.BigDecimal;
@@ -9,6 +10,7 @@ public class Autor {
     public int idAutor;
     public String vorname;
     public String nachname;
+    @Past(message = "Geburtsdatum muss in der Vergangeheit liegen")
     public LocalDate gebdatum;
     public BigDecimal umsatz;
     public Boolean istAktiv;
