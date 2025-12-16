@@ -4,7 +4,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/service")
+@Path("/hello")
 public class HelloResource {
     @GET
     @Produces(MediaType.TEXT_PLAIN)

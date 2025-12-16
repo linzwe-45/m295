@@ -52,4 +52,6 @@ public class Autor {
     public void setIstAktiv(Boolean istAktiv) {
         this.istAktiv = istAktiv;
     }
+    public Buch getBuch() { return buch; }
+    public void setBuch(Buch buch) { this.buch = buch; }
 }

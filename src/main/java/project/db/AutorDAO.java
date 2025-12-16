@@ -82,14 +82,13 @@ public class AutorDAO {
     //Update
     public int updateAutor(Autor a) throws SQLException {
         Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/literatur?user=lin&password=z3a");
-        PreparedStatement pstmt= con.prepareStatement("update autor set vorname=?, nachname=?, gebdatum=?, umsatz=?, istAktiv=?, idBuch=? where idAutor=?");
-        pstmt.setInt(7, a.getIdAutor());
+        PreparedStatement pstmt= con.prepareStatement("update autor set vorname=?, nachname=?, gebdatum=?, umsatz=?, istAktiv=? where idAutor=?");
+        pstmt.setInt(6, a.getIdAutor());
         pstmt.setString(1, a.getVorname());
         pstmt.setString(2, a.getNachname());
         pstmt.setObject(3, a.getGebdatum());
         pstmt.setObject(4, a.getUmsatz());
         pstmt.setBoolean(5, a.getIstAktiv());
-        pstmt.setInt(6, a.buch.getIdBuch());
         int row= pstmt.executeUpdate();
         con.close();
         return row; // 1 bedeutet das 1 row geändert wurde
@@ -124,16 +123,54 @@ public class AutorDAO {
         else pstmt.setNull(2, Types.VARCHAR);
         //NUll möglich setzen
         pstmt.setString(3, a.getNachname());
-        pstmt.setObject(4, a.getGebdatum());
+        if (a.getGebdatum() != null) {
+            pstmt.setDate(4, java.sql.Date.valueOf(a.getGebdatum()));
+        } else {
+            pstmt.setNull(4, Types.DATE);
+        }
         pstmt.setObject(5, a.getUmsatz());
         pstmt.setBoolean(6, a.getIstAktiv());
-        pstmt.setInt(7, a.buch.getIdBuch());
+        if (a.getBuch() != null) {
+            pstmt.setInt(7, a.getBuch().getIdBuch());
+        } else {
+            pstmt.setNull(7, Types.INTEGER); // or handle default value
+        }
         int row= pstmt.executeUpdate();
         con.close();
         return row; //1 bedeutet das 1 row erstellt wurde
     }
+    public int createTables() throws SQLException {
+        Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/literatur?user=lin&password=z3a");
+        Statement stmt = con.createStatement();
+        stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS buch (" +
+                        "idBuch INT NOT NULL, " +
+                        "titel VARCHAR(45) NULL, " +
+                        "PRIMARY KEY (idBuch))"
+        );
+        stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS autor (" +
+                        "idAutor INT NOT NULL, " +
+                        "vorname VARCHAR(25) NULL, " +
+                        "nachname VARCHAR(25) NULL, " +
+                        "gebdatum DATE NULL, " +
+                        "umsatz DECIMAL(10,2) NULL, " +
+                        "istAktiv TINYINT NULL, " +
+                        "idBuch INT NOT NULL, " +
+                        "PRIMARY KEY (idAutor), " +
+                        "FOREIGN KEY (idBuch) REFERENCES buch(idBuch))"
+        );
+        stmt.executeUpdate("INSERT INTO buch (idBuch, titel) VALUES (1, 'Linas Reise')");
+        stmt.executeUpdate("INSERT INTO buch (idBuch, titel) VALUES (2, 'Java lernen leicht gemacht')");
 
-    //Create Tables!!
+        // --- Startdaten autor ---
+        stmt.executeUpdate("INSERT INTO autor (idAutor, vorname, nachname, gebdatum, umsatz, istAktiv, idBuch) " +
+                "VALUES (1, 'Lina', 'Zweifel', '2004-05-03', 10.05, 1, 1)");
+        int row = stmt.executeUpdate("INSERT INTO autor (idAutor, vorname, nachname, gebdatum, umsatz, istAktiv, idBuch) " +
+                "VALUES (2, 'Tina', 'Muster', '2000-08-15', 15.50, 0, 2)");
+
+        return row; //1 bedeutet das 1 row erstellt wurde
+    }
 
 
 

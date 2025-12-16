@@ -1,5 +1,6 @@
 package project.services;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -22,14 +23,14 @@ public class AutorResource {
     //GET
     @GET
     @Path("/ping")
-    //Permitall
+    @PermitAll
     @Produces(MediaType.TEXT_PLAIN)
     public Response ping() {
         return Response.ok("API is running").build();
     }
 
     @GET
-    //@RolesAllowed({"ADMIN", "USER"})
+    @RolesAllowed({"ADMIN", "USER"})
     @Produces(MediaType.APPLICATION_JSON)
     public Response everyAutor() {
 
@@ -52,7 +53,8 @@ public class AutorResource {
     }
 
     @GET
-    //@RolesAllowed({"ADMIN", "USER"})
+    @Path("/counter")
+    @RolesAllowed({"ADMIN", "USER"})
     @Produces(MediaType.APPLICATION_JSON)
     public Response countEveryAutor() {
 
@@ -76,8 +78,9 @@ public class AutorResource {
     }
 
     @GET
+    @Path("/byId")
     @Produces(MediaType.APPLICATION_JSON)
-    //@RolesAllowed({"ADMIN", "USER"})
+    @RolesAllowed({"ADMIN", "USER"})
     public Response findAutorById(@QueryParam("id") int id) {
         AutorDAO dao = new AutorDAO();
         Autor a = null;
@@ -98,13 +101,23 @@ public class AutorResource {
     }
 
     @GET
+    @Path("/byDatum")
     @Produces(MediaType.APPLICATION_JSON)
-    //@RolesAllowed({"ADMIN", "USER"})
-    public Response findAutorByDate(@QueryParam("datum") LocalDate datum) {
+    @RolesAllowed({"ADMIN", "USER"})
+    public Response findAutorByDate(@QueryParam("datum") String datum) {
+        //Problem mit LocalDate eingabe
+        LocalDate date;
+        try {
+            date = LocalDate.parse(datum); // yyyy-MM-dd
+        } catch (Exception e) {
+            logger.error("Ungültiges Datumformat in der Eingabe");
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
         AutorDAO dao = new AutorDAO();
         Autor a = null;
         try {
-            a = dao.getAutorByDate(datum);
+            a = dao.getAutorByDate(date);
             logger.info("try fetch author by gebdat");
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -123,8 +136,8 @@ public class AutorResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)//benutzt json
     @Produces(MediaType.TEXT_PLAIN)//erstellt text
-    //@RolesAllowed("ADMIN")
-    public Response updateModul(@Valid Autor a) {
+    @RolesAllowed("ADMIN")
+    public Response updateAutor(@Valid Autor a) {
         AutorDAO dao = new AutorDAO();
         int rows = 0;
         try {
@@ -145,9 +158,10 @@ public class AutorResource {
 
     //Delete
     @DELETE
+    @Path("/{id}")
     @Produces(MediaType.TEXT_PLAIN)
     @RolesAllowed("ADMIN")
-    public Response deleteAutor(@QueryParam("id") int id) {
+    public Response deleteAutor(@PathParam("id") int id) {
         AutorDAO dao = new AutorDAO();
         int rows = 0;
         try {
@@ -188,7 +202,7 @@ public class AutorResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @RolesAllowed("ADMIN")
-    public Response addAutor(@Valid Autor a) {
+    public Response addTAutor(@Valid Autor a) {
         //Db Instert into Modul
         AutorDAO dao = new AutorDAO();
         int rows = 0;
@@ -203,6 +217,30 @@ public class AutorResource {
             return Response.ok(a).build();
         }
         return Response.status(Response.Status.BAD_REQUEST).entity("Kein Autor erstelllt").build();
+        //if m exisitert schon Fehler
+    }
+
+
+    @POST
+    @Path("/init")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @RolesAllowed("ADMIN")
+    public Response addDB() {
+        //Db Instert into Modul
+        AutorDAO dao = new AutorDAO();
+        int rows = 0;
+        try {
+            rows = dao.createTables();
+            logger.info("Try create DB");
+        } catch (SQLException e) {
+            logger.error(e.getMessage());
+        }
+
+        if (rows == 1) {
+            return Response.ok("Gut").build();
+        }
+        return Response.status(Response.Status.BAD_REQUEST).entity("Keine Tabelle erstelllt").build();
         //if m exisitert schon Fehler
     }
 }
