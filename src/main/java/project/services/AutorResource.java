@@ -82,10 +82,7 @@ public class AutorResource {
     @Path("/byId")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN", "USER"})
-    public Response findAuthorById(
-            @QueryParam("id")
-            @Positive(message = "AutorId muss positiv sein")
-            int id) {
+    public Response findAuthorById(@QueryParam("id") int id) {
         AutorDAO dao = new AutorDAO();
         Autor a = null;
         try {
@@ -173,10 +170,7 @@ public class AutorResource {
     @Path("/{id}")
     @Produces(MediaType.TEXT_PLAIN)
     @RolesAllowed("ADMIN")
-    public Response deleteAuthor(
-            @PathParam("id")
-            @Positive(message = "AutorId muss positiv sein")
-            int id) {
+    public Response deleteAuthor(@PathParam("id") int id) {
         AutorDAO dao = new AutorDAO();
         int rows = 0;
         try {
@@ -245,7 +239,7 @@ public class AutorResource {
     @Path("/init")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    @RolesAllowed("ADMIN")
+    @PermitAll
     public Response addDB() {
         AutorDAO dao = new AutorDAO();
         int rows = 0;
