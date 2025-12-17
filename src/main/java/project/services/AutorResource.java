@@ -3,6 +3,7 @@ package project.services;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -47,7 +48,7 @@ public class AutorResource {
             return Response.ok(autorliste).build();
         } else
         {
-            logger.error("authors not found");
+            logger.error("No authors found");
             return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
@@ -67,12 +68,12 @@ public class AutorResource {
             logger.error(e.getMessage());
         }
         if (autorliste.size() != 0) {
-            logger.info("at least one author was fetched");
+            logger.info("At least one author was fetched");
             int count = autorliste.size();
             return Response.ok(count + " Autoren wurden in der Liste gefunden.").build();
         } else
         {
-            logger.error("authors not found");
+            logger.error("No authors found");
             return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
@@ -81,7 +82,10 @@ public class AutorResource {
     @Path("/byId")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN", "USER"})
-    public Response findAutorById(@QueryParam("id") int id) {
+    public Response findAutorById(
+            @QueryParam("id")
+            @Positive(message = "AutorId muss positiv sein")
+            int id) {
         AutorDAO dao = new AutorDAO();
         Autor a = null;
         try {
@@ -91,11 +95,11 @@ public class AutorResource {
             logger.error(e.getMessage());
         }
         if (a != null) {
-            logger.info("author fetched by id");
+            logger.info("Author successfully fetched by id");
             return Response.ok(a).build();
         } else
         {
-            logger.error("author not found");
+            logger.error("Author not found");
             return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
@@ -104,14 +108,22 @@ public class AutorResource {
     @Path("/byDatum")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN", "USER"})
-    public Response findAutorByDate(@QueryParam("datum") String datum) {
-        //Problem mit LocalDate eingabe
+    public Response findAutorByDate(
+            @QueryParam("datum")
+            String datum) {
+        //Problem mit Datentyp LocalDate eingabe
         LocalDate date;
         try {
             date = LocalDate.parse(datum); // yyyy-MM-dd
         } catch (Exception e) {
             logger.error("Ungültiges Datumformat in der Eingabe");
             return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        if (date.isAfter(LocalDate.now())) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Datum muss in der Vergangenheit liegen")
+                    .build();
         }
 
         AutorDAO dao = new AutorDAO();
@@ -123,37 +135,37 @@ public class AutorResource {
             logger.error(e.getMessage());
         }
         if (a != null) {
-            logger.info("author fetched by gebdat");
+            logger.info("Author successfully fetched by gebdat");
             return Response.ok(a).build();
         } else
         {
-            logger.error("author not found");
+            logger.error("Author not found");
             return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
 
     //Update
     @PUT
-    @Consumes(MediaType.APPLICATION_JSON)//benutzt json
-    @Produces(MediaType.TEXT_PLAIN)//erstellt text
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     @RolesAllowed("ADMIN")
     public Response updateAutor(@Valid Autor a) {
         AutorDAO dao = new AutorDAO();
         int rows = 0;
         try {
             rows = dao.updateAutor(a);
-            logger.info("Autor updated");
+            logger.info("Try update Author");
         } catch (SQLException e) {
             logger.error(e.getMessage());
         }
         if (rows == 1) {
+            logger.info("Author successfully updated");
             return Response.ok("Autor " + a.idAutor + " updated").build();
-        }
-        return Response.status(Response.Status.BAD_REQUEST)
+        }else {
+            logger.error("Author not found");
+            return Response.status(Response.Status.BAD_REQUEST)
                 .entity("Kein Autor zum updaten, Autor darf nicht leer sein").build();
-        //if Autor exisitert schon Fehler
-
-
+        }
     }
 
     //Delete
@@ -161,27 +173,32 @@ public class AutorResource {
     @Path("/{id}")
     @Produces(MediaType.TEXT_PLAIN)
     @RolesAllowed("ADMIN")
-    public Response deleteAutor(@PathParam("id") int id) {
+    public Response deleteAutor(
+            @PathParam("id")
+            @Positive(message = "AutorId muss positiv sein")
+            int id) {
         AutorDAO dao = new AutorDAO();
         int rows = 0;
         try {
             rows = dao.deleteAutor(id);
-            logger.info("autor deleted");
+            logger.info("Try delete author");
         } catch (SQLException e) {
             logger.error(e.getMessage());
         }
-        if (rows == 0) {
+        if (rows != 0) {
+            logger.info("Author successfully deleted");
+            return Response.ok("Autor " + id + " geloscht").build();
+        } else {
+            logger.error("Author not found");
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Kein autor geloscht").build();
+                    .entity("Kein Autor geloscht").build();
         }
-        return Response.ok("Autor " + id + " geloscht").build();
     }
 
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     @RolesAllowed("ADMIN")
     public Response deleteAll() {
-        //Delete from Modul where nr = nr
         AutorDAO dao = new AutorDAO();
         int rows = 0;
         try {
@@ -191,19 +208,21 @@ public class AutorResource {
             logger.error(e.getMessage());
         }
         if (rows == 0) {
+            logger.error("Entries could not be deleted");
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Inhalt konnte nicht geloscht werden").build();
+        } else {
+            logger.info("All rows deleted in Table Autor");
+            return Response.ok("Inhalt deleted").build();
         }
-        return Response.ok("Inhalt deleted").build();
     }
 
     //Create
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed("ADMIN")
-    public Response addTAutor(@Valid Autor a) {
-        //Db Instert into Modul
+    public Response addAutor(@Valid Autor a) {
         AutorDAO dao = new AutorDAO();
         int rows = 0;
         try {
@@ -214,12 +233,13 @@ public class AutorResource {
         }
 
         if (rows == 1) {
+            logger.info("Author added successfully");
             return Response.ok(a).build();
+        } else {
+            logger.error("Author not added");
+            return Response.status(Response.Status.BAD_REQUEST).entity("Kein Autor erstelllt").build();
         }
-        return Response.status(Response.Status.BAD_REQUEST).entity("Kein Autor erstelllt").build();
-        //if m exisitert schon Fehler
     }
-
 
     @POST
     @Path("/init")
@@ -227,7 +247,6 @@ public class AutorResource {
     @Produces(MediaType.TEXT_PLAIN)
     @RolesAllowed("ADMIN")
     public Response addDB() {
-        //Db Instert into Modul
         AutorDAO dao = new AutorDAO();
         int rows = 0;
         try {
@@ -238,9 +257,11 @@ public class AutorResource {
         }
 
         if (rows == 1) {
-            return Response.ok("Gut").build();
+            logger.info("DB created");
+            return Response.ok("Datenbanktabellen wurde mit je 2 Eintraegen erstellt").build();
+        } else {
+            logger.error("DB not created");
+            return Response.status(Response.Status.BAD_REQUEST).entity("Keine Tabellen erstelllt").build();
         }
-        return Response.status(Response.Status.BAD_REQUEST).entity("Keine Tabelle erstelllt").build();
-        //if m exisitert schon Fehler
     }
 }

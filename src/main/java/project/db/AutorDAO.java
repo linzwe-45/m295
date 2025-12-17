@@ -139,9 +139,11 @@ public class AutorDAO {
         con.close();
         return row; //1 bedeutet das 1 row erstellt wurde
     }
+
     public int createTables() throws SQLException {
         Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/literatur?user=lin&password=z3a");
         Statement stmt = con.createStatement();
+        int rows= 0;
         stmt.executeUpdate(
                 "CREATE TABLE IF NOT EXISTS buch (" +
                         "idBuch INT NOT NULL, " +
@@ -166,10 +168,10 @@ public class AutorDAO {
         // --- Startdaten autor ---
         stmt.executeUpdate("INSERT INTO autor (idAutor, vorname, nachname, gebdatum, umsatz, istAktiv, idBuch) " +
                 "VALUES (1, 'Lina', 'Zweifel', '2004-05-03', 10.05, 1, 1)");
-        int row = stmt.executeUpdate("INSERT INTO autor (idAutor, vorname, nachname, gebdatum, umsatz, istAktiv, idBuch) " +
+        rows += stmt.executeUpdate("INSERT INTO autor (idAutor, vorname, nachname, gebdatum, umsatz, istAktiv, idBuch) " +
                 "VALUES (2, 'Tina', 'Muster', '2000-08-15', 15.50, 0, 2)");
-
-        return row; //1 bedeutet das 1 row erstellt wurde
+        con.close();
+        return rows;
     }
 
 

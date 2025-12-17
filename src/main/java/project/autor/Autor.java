@@ -1,6 +1,8 @@
 package project.autor;
 
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
 import project.buch.Buch;
 
 import java.math.BigDecimal;
@@ -8,10 +10,12 @@ import java.time.LocalDate;
 
 public class Autor {
     public int idAutor;
+    @Size(min = 1, max = 25, message = "Vorname darf maximal 25 Zeichen lang sein")
     public String vorname;
     public String nachname;
     @Past(message = "Geburtsdatum muss in der Vergangeheit liegen")
     public LocalDate gebdatum;
+    @DecimalMin(value = "0.00", message = "Umsatz darf nicht negativ sein")
     public BigDecimal umsatz;
     public Boolean istAktiv;
     public Buch buch;
