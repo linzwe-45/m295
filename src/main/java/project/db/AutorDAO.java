@@ -117,7 +117,7 @@ public class AutorDAO {
 
     public int deleteAll() throws SQLException {
         Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/literatur?user=lin&password=z3a");
-        PreparedStatement pstmt= con.prepareStatement("delete from autor");
+        PreparedStatement pstmt= con.prepareStatement("delete from autor; delete from buch;");
         int rows= pstmt.executeUpdate();
         con.close();
         return rows;
