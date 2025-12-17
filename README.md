@@ -1,9 +1,11 @@
 # Projeket: Project_Lina_Z - m295 Prüfung
 
 - ### Beschreibung:
-  - Diesem Projekt implemetiert eine REST-API zur Verwaltung einer Literatur-Datenbank. Die Java-Klassen und die Datenbanktabellen basieren auf den Entitäten "Autor" und "Buch". 
-  - Dabei deckt die API alle basis CRUD-Operationen ab, also GET, PUT, POST und DELETE. 
-  - Zusätzlich verfügt die API über eine AUthentifizierung, um den Zugriff abzusichern. 
+  - Diesem Projekt implemetiert eine REST-API zur Verwaltung einer Literatur-Datenbank. 
+  Die Java-Klassen und die Datenbanktabellen basieren auf den Entitäten "Autor" und "Buch". 
+  Dabei deckt die API alle basis CRUD-Operationen ab, also GET, PUT, POST und DELETE. 
+    Zusätzlich verfügt die API über eine AUthentifizierung, um den Zugriff abzusichern. 
+
 - ### SQL-Code:
 ````SQL
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
@@ -60,6 +62,7 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
   - **Umsatz** @DecimalMin(value = "0.00"): Der Umsatz darf nicht kleiner als 0 sein/ negative Werte sind ungültig
   - **Gebdatum** @Past: Das Datum muss in der Vergangenheit liegen
   - **Vorname** @Size(min=1, max=25): Der Vorname darf wie in der DB nicht länger sein als 25 Zeichen
+
 - ### Berechtigungsmatrix:
   - #### Alle haben die Rechte: @PermitAll
     - GET ping 
