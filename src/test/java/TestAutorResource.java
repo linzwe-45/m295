@@ -346,6 +346,29 @@ public class TestAutorResource {
         assertEquals(HttpStatus.SC_CONFLICT, httpResponse.getStatusLine().getStatusCode());
     }
     @Test
+    //Negativ -> Falsches Format beim Datum
+    public void test12AddAutorNeg2() throws IOException {
+        final HttpPost httpPost = new HttpPost("http://localhost:8080/Project_Lina_Z_war_exploded/resources/service");
+
+        final String auth = "admin" + ":" + "1234";
+        final byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.ISO_8859_1));
+        final String authHeader = "Basic " + new String(encodedAuth);
+        httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+
+        String json = "{\"idAutor\":11,\"vorname\":\"Sina\",\"nachname\":\"Zweifel\",\"gebdatum\":[03.05.2004]," +
+                "\"umsatz\":10.05,\"istAktiv\":false,\"buch\":{\"idBuch\":2}}";
+        StringEntity entity = new StringEntity(json);
+        httpPost.setEntity(entity);
+        httpPost.setHeader("Content-type", "application/json");
+
+        HttpResponse httpResponse = HttpClientBuilder
+                .create()
+                .build()
+                .execute(httpPost);
+        //Testen
+        assertEquals(HttpStatus.SC_BAD_REQUEST, httpResponse.getStatusLine().getStatusCode());
+    }
+    @Test
     //Randbedingungen -> Datum liegt in Zukunft
     public void test12AddAutorRand1() throws IOException {
         final HttpPost httpPost = new HttpPost("http://localhost:8080/Project_Lina_Z_war_exploded/resources/service");
