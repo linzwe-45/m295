@@ -84,11 +84,22 @@ public class AutorDAO {
         Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/literatur?user=lin&password=z3a");
         PreparedStatement pstmt= con.prepareStatement("update autor set vorname=?, nachname=?, gebdatum=?, umsatz=?, istAktiv=? where idAutor=?");
         pstmt.setInt(6, a.getIdAutor());
-        pstmt.setString(1, a.getVorname());
-        pstmt.setString(2, a.getNachname());
-        pstmt.setObject(3, a.getGebdatum());
-        pstmt.setObject(4, a.getUmsatz());
-        pstmt.setBoolean(5, a.getIstAktiv());
+
+        if (a.getVorname() != null) {pstmt.setString(1, a.getVorname());
+        } else pstmt.setNull(1, Types.VARCHAR);
+
+        if (a.getNachname() != null) {pstmt.setString(2, a.getNachname());
+        } else pstmt.setNull(2, Types.VARCHAR);
+
+        if (a.getGebdatum() != null) { pstmt.setDate(3, java.sql.Date.valueOf(a.getGebdatum()));
+        } else pstmt.setNull(3, Types.DATE);
+
+        if (a.getUmsatz() != null) { pstmt.setBigDecimal(4, a.getUmsatz());
+        } else pstmt.setNull(4, Types.NUMERIC);
+
+        if (a.getIstAktiv() != null) {pstmt.setBoolean(5, a.getIstAktiv());
+        } else pstmt.setNull(5, Types.BOOLEAN);
+
         int row= pstmt.executeUpdate();
         con.close();
         return row; // 1 bedeutet das 1 row geändert wurde
@@ -116,25 +127,26 @@ public class AutorDAO {
     public int createAutor(Autor a) throws SQLException {
         Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/literatur?user=lin&password=z3a");
         PreparedStatement pstmt= con.prepareStatement("insert into autor (idAutor, vorname, nachname, gebdatum, umsatz, istAktiv, idBuch) values (?, ?, ?, ?, ?, ?,?)");
+
         pstmt.setInt(1, a.getIdAutor());
-        if (a.getVorname() != null) {
-            pstmt.setString(2, a.getVorname());
-        }
-        else pstmt.setNull(2, Types.VARCHAR);
-        //NUll möglich setzen
-        pstmt.setString(3, a.getNachname());
-        if (a.getGebdatum() != null) {
-            pstmt.setDate(4, java.sql.Date.valueOf(a.getGebdatum()));
-        } else {
-            pstmt.setNull(4, Types.DATE);
-        }
-        pstmt.setObject(5, a.getUmsatz());
-        pstmt.setBoolean(6, a.getIstAktiv());
-        if (a.getBuch() != null) {
-            pstmt.setInt(7, a.getBuch().getIdBuch());
-        } else {
-            pstmt.setNull(7, Types.INTEGER); // or handle default value
-        }
+
+        if (a.getVorname() != null) {pstmt.setString(2, a.getVorname());
+        } else pstmt.setNull(2, Types.VARCHAR);
+
+        if (a.getNachname() != null) {pstmt.setString(3, a.getNachname());
+        } else pstmt.setNull(3, Types.VARCHAR);
+
+        if (a.getGebdatum() != null) { pstmt.setDate(4, java.sql.Date.valueOf(a.getGebdatum()));
+        } else pstmt.setNull(4, Types.DATE);
+
+        if (a.getUmsatz() != null) { pstmt.setBigDecimal(5, a.getUmsatz());
+        } else pstmt.setNull(5, Types.NUMERIC);
+
+        if (a.getIstAktiv() != null) {pstmt.setBoolean(6, a.getIstAktiv());
+        } else pstmt.setNull(6, Types.BOOLEAN);
+
+        pstmt.setInt(7, a.getBuch().getIdBuch());
+
         int row= pstmt.executeUpdate();
         con.close();
         return row; //1 bedeutet das 1 row erstellt wurde

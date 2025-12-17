@@ -33,7 +33,7 @@ public class AutorResource {
     @GET
     @RolesAllowed({"ADMIN", "USER"})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response everyAutor() {
+    public Response everyAuthor() {
 
         AutorDAO dao = new AutorDAO();
         ArrayList<Autor> autorliste = null;
@@ -57,19 +57,19 @@ public class AutorResource {
     @Path("/counter")
     @RolesAllowed({"ADMIN", "USER"})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response countEveryAutor() {
+    public Response countEveryAuthor() {
 
         AutorDAO dao = new AutorDAO();
-        ArrayList<Autor> autorliste = null;
+        ArrayList<Autor> authorlist = null;
         try {
-            autorliste = dao.getEveryModul();
+            authorlist = dao.getEveryModul();
             logger.info("try fetch every author");
         } catch (SQLException e) {
             logger.error(e.getMessage());
         }
-        if (autorliste.size() != 0) {
+        if (authorlist.size() != 0) {
             logger.info("At least one author was fetched");
-            int count = autorliste.size();
+            int count = authorlist.size();
             return Response.ok(count + " Autoren wurden in der Liste gefunden.").build();
         } else
         {
@@ -82,7 +82,7 @@ public class AutorResource {
     @Path("/byId")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN", "USER"})
-    public Response findAutorById(
+    public Response findAuthorById(
             @QueryParam("id")
             @Positive(message = "AutorId muss positiv sein")
             int id) {
@@ -108,7 +108,7 @@ public class AutorResource {
     @Path("/byDatum")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN", "USER"})
-    public Response findAutorByDate(
+    public Response findAuthorByDate(
             @QueryParam("datum")
             String datum) {
         //Problem mit Datentyp LocalDate eingabe
@@ -149,7 +149,7 @@ public class AutorResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @RolesAllowed("ADMIN")
-    public Response updateAutor(@Valid Autor a) {
+    public Response updateAuthor(@Valid Autor a) {
         AutorDAO dao = new AutorDAO();
         int rows = 0;
         try {
@@ -163,7 +163,7 @@ public class AutorResource {
             return Response.ok("Autor " + a.idAutor + " updated").build();
         }else {
             logger.error("Author not found");
-            return Response.status(Response.Status.BAD_REQUEST)
+            return Response.status(Response.Status.NOT_FOUND)
                 .entity("Kein Autor zum updaten, Autor darf nicht leer sein").build();
         }
     }
@@ -173,7 +173,7 @@ public class AutorResource {
     @Path("/{id}")
     @Produces(MediaType.TEXT_PLAIN)
     @RolesAllowed("ADMIN")
-    public Response deleteAutor(
+    public Response deleteAuthor(
             @PathParam("id")
             @Positive(message = "AutorId muss positiv sein")
             int id) {
@@ -190,7 +190,7 @@ public class AutorResource {
             return Response.ok("Autor " + id + " geloscht").build();
         } else {
             logger.error("Author not found");
-            return Response.status(Response.Status.BAD_REQUEST)
+            return Response.status(Response.Status.NOT_FOUND)
                     .entity("Kein Autor geloscht").build();
         }
     }
@@ -209,7 +209,7 @@ public class AutorResource {
         }
         if (rows == 0) {
             logger.error("Entries could not be deleted");
-            return Response.status(Response.Status.BAD_REQUEST)
+            return Response.status(Response.Status.NOT_FOUND)
                     .entity("Inhalt konnte nicht geloscht werden").build();
         } else {
             logger.info("All rows deleted in Table Autor");
@@ -222,7 +222,7 @@ public class AutorResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed("ADMIN")
-    public Response addAutor(@Valid Autor a) {
+    public Response addAuthor(@Valid Autor a) {
         AutorDAO dao = new AutorDAO();
         int rows = 0;
         try {
@@ -237,7 +237,7 @@ public class AutorResource {
             return Response.ok(a).build();
         } else {
             logger.error("Author not added");
-            return Response.status(Response.Status.BAD_REQUEST).entity("Kein Autor erstelllt").build();
+            return Response.status(Response.Status.CONFLICT).entity("Kein Autor erstelllt").build();
         }
     }
 
@@ -261,7 +261,7 @@ public class AutorResource {
             return Response.ok("Datenbanktabellen wurde mit je 2 Eintraegen erstellt").build();
         } else {
             logger.error("DB not created");
-            return Response.status(Response.Status.BAD_REQUEST).entity("Keine Tabellen erstelllt").build();
+            return Response.status(Response.Status.CONFLICT).entity("Keine Tabellen erstelllt").build();
         }
     }
 }

@@ -15,7 +15,6 @@ import org.junit.runners.MethodSorters;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -217,7 +216,7 @@ public class TestAutorResource {
                 .build()
                 .execute(httpPut);
         //Testen-> gibt nichts zum updaten
-        assertEquals(HttpStatus.SC_BAD_REQUEST, httpResponse.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.SC_NOT_FOUND, httpResponse.getStatusLine().getStatusCode());
     }
 
 
@@ -256,7 +255,7 @@ public class TestAutorResource {
                 .execute(httpDelete);
         String response = EntityUtils.toString(httpResponse.getEntity());
         // Testen
-        assertEquals(HttpStatus.SC_BAD_REQUEST, httpResponse.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.SC_NOT_FOUND, httpResponse.getStatusLine().getStatusCode());
     }
 
 
@@ -302,7 +301,29 @@ public class TestAutorResource {
         assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
     }
     @Test
-    //Negativ -> Datumformat falsch
+    //Positiv -> mit null
+    public void test11AddAutor2() throws IOException {
+        final HttpPost httpPost = new HttpPost("http://localhost:8080/Project_Lina_Z_war_exploded/resources/service");
+
+        final String auth = "admin" + ":" + "1234";
+        final byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.ISO_8859_1));
+        final String authHeader = "Basic " + new String(encodedAuth);
+        httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+
+        String json = "{\"idAutor\":9,\"vorname\":null,\"nachname\":null,\"gebdatum\":null," +
+                "\"umsatz\":null,\"istAktiv\":null,\"buch\":{\"idBuch\":2}}";
+        StringEntity entity = new StringEntity(json);
+        httpPost.setEntity(entity);
+        httpPost.setHeader("Content-type", "application/json");
+        HttpResponse httpResponse = HttpClientBuilder
+                .create()
+                .build()
+                .execute(httpPost);
+        //Testen
+        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    }
+    @Test
+    //Negativ -> Gibt schon einen Eintrag mit idAutor= 2
     public void test12AddAutorNeg() throws IOException {
         final HttpPost httpPost = new HttpPost("http://localhost:8080/Project_Lina_Z_war_exploded/resources/service");
 
@@ -311,7 +332,7 @@ public class TestAutorResource {
         final String authHeader = "Basic " + new String(encodedAuth);
         httpPost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
 
-        String json = "{\"idAutor\":5,\"vorname\":\"Sina\",\"nachname\":\"Zweifel\",\"gebdatum\":[03.05.2004]," +
+        String json = "{\"idAutor\":2,\"vorname\":\"Sina\",\"nachname\":\"Zweifel\",\"gebdatum\":null," +
                 "\"umsatz\":10.05,\"istAktiv\":false,\"buch\":{\"idBuch\":2}}";
         StringEntity entity = new StringEntity(json);
         httpPost.setEntity(entity);
@@ -322,7 +343,7 @@ public class TestAutorResource {
                 .build()
                 .execute(httpPost);
         //Testen
-        assertEquals(HttpStatus.SC_BAD_REQUEST, httpResponse.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.SC_CONFLICT, httpResponse.getStatusLine().getStatusCode());
     }
     @Test
     //Randbedingungen -> Datum liegt in Zukunft
